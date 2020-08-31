@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 // class to be the Controller of the elements from screen (from MainView.fxml)
 public class MainViewController implements Initializable {
@@ -39,7 +40,8 @@ public class MainViewController implements Initializable {
 	
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		// loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml"); // this line is only for testing. We'll delete it.
 	}
 	
 	
@@ -86,5 +88,39 @@ public class MainViewController implements Initializable {
 	}
 
 	
+	// this method is only for testing. Let's delete it after
+	private synchronized void loadView2(String absoluteName) {
+		// synchronized will guarantee that the screen change will occur and not stopped.
+		try {
+			FXMLLoader  loader = new FXMLLoader(getClass().getResource(absoluteName)); // object to load a screen
+			VBox newVBox = loader.load();
+			
+			Scene mainScene = Main.getMainScene(); // calling an scene from the Main class
+			
+			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+			// mainScene.getRoot() will get the first element from the MainView.fxml, The ScrollPane. 
+			// Then, we make a casting to ScrollPane class.
+			// .getContent() will get the content of the ScrollPane. It's already a reference to what it's inside of the ScrollPane, the VBox.
+			// Then, we make a casting to VBox
+			
+			Node mainMenu = mainVBox.getChildren().get(0);
+			// we must keep the menus. So, we'll store a reference of it.	
+			// Getting the first children in the VBox.
+			
+			mainVBox.getChildren().clear(); // Clearing all children of mainVBox
+			
+			// now we're adding all the elements cause we want to keep the menu across all screens
+			mainVBox.getChildren().add(mainMenu);
+			mainVBox.getChildren().addAll(newVBox.getChildren());
+			
+			
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
+		}
+		catch(IOException e) {
+			Alerts.showAlert("IO Exception", "Error loading View", e.getMessage(), AlertType.ERROR);
+		}
+	}
 	
 }

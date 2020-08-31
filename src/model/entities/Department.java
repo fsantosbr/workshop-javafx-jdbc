@@ -2,6 +2,7 @@ package model.entities;
 
 import java.io.Serializable;
 
+// Class of Domain. Handling the Department
 public class Department implements Serializable {
 
 	private static final long serialVersionUID = 1L;
