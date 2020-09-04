@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.collections.FXCollections;
@@ -27,7 +28,7 @@ import model.entities.Department;
 import model.services.DepartmentService;
 
 //class to be the Controller of the elements from the DepartmentList screen (from DepartmentList.fxml)
-public class DepartmentListController implements Initializable {
+public class DepartmentListController implements Initializable, DataChangeListener {
 
 	
 	private DepartmentService service;
@@ -94,12 +95,13 @@ public class DepartmentListController implements Initializable {
 			DepartmentFormController controller = loader.getController();
 			controller.setDepartment(obj);
 			controller.setDepartmentService(new DepartmentService());
+			controller.subscriveDataChangeListener(this); // here we're subscribing ourselves
 			controller.updateFormData();
 			
 			Stage dialogStage = new Stage();
 			dialogStage.setTitle("Enter Department data");
 			dialogStage.setScene(new Scene(pane));
-			dialogStage.setResizable(false); // the window cannot be resizable
+			dialogStage.setResizable(false); // the window cannot be resizeble
 			dialogStage.initOwner(parentStage);
 			dialogStage.initModality(Modality.WINDOW_MODAL);
 			dialogStage.showAndWait();
@@ -108,6 +110,15 @@ public class DepartmentListController implements Initializable {
 		catch(IOException e) {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
 		}
+	}
+
+
+	@Override
+	public void onDataChanged() {
+		updateTableView();
+		// This method is from DataChangeListener Interface.
+		// when a change occurs, it'll trigger our update method created here
+		
 	}
 
 }

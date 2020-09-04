@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -24,6 +27,8 @@ public class DepartmentFormController implements Initializable {
 	private Department entity;
 	
 	private DepartmentService service;
+	
+	private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 	
 	@FXML
 	private TextField txtId;
@@ -49,6 +54,12 @@ public class DepartmentFormController implements Initializable {
 		this.service = service;
 	}
 	
+	// command to add obj to be listened
+	// this method will add to a list whatever wants to be updated
+	public void subscriveDataChangeListener(DataChangeListener listener) {
+		dataChangeListeners.add(listener);
+	}
+	
 	
 	@FXML
 	public void onBtSaveAction(ActionEvent event) {
@@ -61,6 +72,7 @@ public class DepartmentFormController implements Initializable {
 		try {
 			entity = getFormData();
 			service.saveOrUpdate(entity);
+			notifyDataChangeListeners(); // calling the method that will update the content automatically
 			Utils.currentStage(event).close(); //this line will close the current screen
 		}
 		catch (DbException e) {
@@ -68,6 +80,16 @@ public class DepartmentFormController implements Initializable {
 		}
 	}
 	
+	// this method will notify all subscribers of the DataChangeListener about a change
+	private void notifyDataChangeListeners() {
+		for (DataChangeListener listener: dataChangeListeners) {
+			listener.onDataChanged();
+		}
+		
+	}
+	
+
+
 	private Department getFormData() {
 		Department obj = new Department();
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
