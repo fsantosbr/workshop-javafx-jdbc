@@ -9,6 +9,7 @@ import application.Main;
 import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,6 +19,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -42,6 +44,10 @@ public class DepartmentListController implements Initializable, DataChangeListen
 	
 	@FXML
 	private TableColumn<Department, String> tableColumnName; // handling the name (a string)
+	
+	@FXML
+	private TableColumn<Department, Department> tableColumnEDIT;
+	
 	
 	@FXML
 	private Button btNew;
@@ -84,6 +90,7 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		List<Department> list = service.findAll();
 		obsList = FXCollections.observableArrayList(list);
 		tableViewDepartment.setItems(obsList);
+		initEditButtons();
 	}
 	
 	private void createDialogForm(Department obj, String absoluteName, Stage parentStage) {
@@ -119,6 +126,28 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		// This method is from DataChangeListener Interface.
 		// when a change occurs, it'll trigger our update method created here
 		
+	}
+	
+	
+	// this method will put an edit button in each line/row of the table 
+	// the next method was taken from this link: https://stackoverflow.com/questions/32282230/fxml-javafx-8-tableview-make-a-delete-button-in-each-row-and-delete-the-row-a
+	private void initEditButtons() {
+		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		tableColumnEDIT.setCellFactory(param -> new TableCell<Department, Department>() {
+			private final Button button = new Button("edit");
+			
+			@Override
+			protected void updateItem(Department obj, boolean empty) {
+				super.updateItem(obj, empty);
+				if (obj == null) {
+					setGraphic(null);
+					return;
+				}
+				setGraphic(button);
+				button.setOnAction(
+					event -> createDialogForm(obj, "/gui/DepartmentForm.fxml",Utils.currentStage(event)));
+			}
+		});
 	}
 
 }
